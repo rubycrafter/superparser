@@ -33,6 +33,7 @@ module Scanner
     Scanner.depth += 1
     page = link.click
     group = link.text.sub(/\d*$/, '')
+    @current_group = group if Scanner.depth == 1
     subgroups = find_subgroups(page, group)
     if subgroups.empty?
       scan_goods(page, group)
@@ -58,7 +59,7 @@ module Scanner
     @products_array << record
     #puts record #DEBUG
     @stats.total_items += 1
-    @stats.items_in_group[:group] += 1
+    @stats.items_in_group[@current_group] += 1
     if @stats.total_items == 1000
       @stats.print_statistics
     end
