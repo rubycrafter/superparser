@@ -1,21 +1,20 @@
 require 'mechanize'
 load 'statistics.rb'
 load 'scanner.rb'
+load 'catalog.rb'
 
 include Scanner
 
-CATALOG = 'http://www.a-yabloko.ru/catalog/'
-HEADERS = %w(type group pic name)
-GROUP_TAG = '#catalog-content .children a'
-SUBGROUP_TAG = '#content.bar .children a'
-PRODUCT_TAG = '#content.bar .goods .img'
+CATALOG_URL = 'http://www.a-yabloko.ru/catalog/'
 STATISTICS = Statistics.new
 
-page = Mechanize.new.get(CATALOG)
+catalog = Catalog.new('list.txt')
 
-group_links = scan_main(page)
-
+main_page = Mechanize.new.get(CATALOG_URL)
+group_links = scan_main(main_page)
 group_links.each do |link|
   scan_page(link)
 end
 
+catalog.read_catalog(products_array)
+catalog.save
