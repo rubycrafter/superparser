@@ -1,12 +1,14 @@
+load 'statistics.rb'
+
 module Scanner
 
   GROUP_TAG = '#catalog-content .children a'
   SUBGROUP_TAG = '#content.bar .children a'
   PRODUCT_TAG = '#content.bar .goods .img'
 
-  PIC_URL_REGEX = /url\((.*)\)/
+  PIC_URL_REGEX = /url\((.*)'./
 
-  attr_accessor :depth, :products_array 
+  attr_accessor :depth, :products_array, :stats
   
   def parse_page(page, tag, type, group)
     hrefs = page.search(tag).map do |row|
@@ -14,7 +16,6 @@ module Scanner
       name = row['title'] if type == 'product'
       pic = take_pic_name(row)
       new_record(type, group, name, pic)
-      #puts "#{Scanner.depth} DEBUG: Added #{type} from #{group}: #{name}; #{pic}"
       row['href']
     end
     links = hrefs.map { |link| page.link_with(href: link) }
@@ -23,6 +24,7 @@ module Scanner
 
   def scan_main(page)
     @products_array = []
+    @stats = Statistics.new
     Scanner.depth = 0
     parse_page(page, GROUP_TAG, 'group', '-')
   end
@@ -54,13 +56,22 @@ module Scanner
   def new_record(type, group, name, pic)
     record = "#{type}\t#{group}\t#{name}\t#{pic}\n"
     @products_array << record
-    puts record
+    #puts record #DEBUG
+    @stats.total_items += 1
+    @stats.items_in_group[:group] += 1
+    if @stats.total_items == 1000
+      @stats.print_statistics
+    end
   end
 
  def take_pic_name(row)
     pic_name = File.basename(row['style'].scan(PIC_URL_REGEX).join)
     if pic_name == '' || pic_name == 'no_img_w280h140.png'
       pic_name = '-'
+      @stats.item_without_picture
+    else
+      @stats.save_pic(pic_name)
+      @stats.check_size(pic_name)
     end
     pic_name
   end

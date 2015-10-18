@@ -1,12 +1,10 @@
 require 'mechanize'
-load 'statistics.rb'
 load 'scanner.rb'
 load 'catalog.rb'
 
 include Scanner
 
 CATALOG_URL = 'http://www.a-yabloko.ru/catalog/'
-STATISTICS = Statistics.new
 
 catalog = Catalog.new('list.txt')
 
