@@ -59,7 +59,7 @@ module Scanner
     @products_array << record
     #puts record #DEBUG
     @stats.total_items += 1
-    @stats.items_in_group[@current_group] += 1
+    @stats.items_in_group[@current_group] += 1 if Scanner.depth >= 1
     if @stats.total_items == 1000
       @stats.print_statistics
     end
